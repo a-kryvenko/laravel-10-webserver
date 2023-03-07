@@ -77,34 +77,34 @@ Also you may need to open database ports on dev server (for example, for PhpStor
 Ports setting up in compose-dev.yml, so in this case you need:
 > compose-app.yml:compose-dev.yml
 
-### 4. Build images and up server
+### 4. Create folder for website content
+
+~~~ 
+mkdir www
+~~~
+
+### 5. Build images and up server
 
 ~~~
 docker-compose build \  
 docker-compose up -d
 ~~~
 
-### 5. If https required, then run script for creating certificates
+### 6. If https required, then run script for creating certificates
 
 ~~~
 ./cgi-bin/prepare-certbot.sh
 ~~~
 
-### 6. Initialize crontab
+### 7. Initialize crontab
 
 ~~~ 
 ./cgi-bin/prepare-crontab.sh
 ~~~
 
-### 7. Create folder for website content
-
-~~~ 
-mkdir www
-cd www
-~~~
-
 ### 8. Install you website content
 
 ~~~ 
+cd www
 git clone you-repository .
 ~~~
