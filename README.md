@@ -35,47 +35,43 @@ cp .env.example .env
 
 ### 3. Modify .env, set up variables
 
-<details>
-     <summary><b>Variables description</b></summary>
-     <ul>
-         <li><b>COMPOSE_FILE</b> - which docker-compose files will be included;</li>
-         <li><b>SYSTEM_GROUP_ID</b> - ID of host user group. Usually 1000;</li>
-         <li><b>SYSTEM_USER_ID</b> - ID of host user. Usually 1000;</li>
-         <li><b>APP_NAME</b> - <b>url</b> by which the site is accessible. For example, <b>example.com</b> or <b>example.local</b> for local development;</li>
-         <li><b>ADMINISTRATOR_EMAIL</b> - email to which we send information about certificates;</li>
-         <li><b>DB_HOST</b> - database host. By default <b>db</b>, but in the case when the database is on another server - specify the server address;</li>
-         <li><b>DB_DATABASE</b> - database name;</li>
-         <li><b>DB_USER</b> - the name of the user who works with the database;</li>
-         <li><b>DB_USER_PASSWORD</b> - database user password;</li>
-         <li><b>DB_ROOT_PASSWORD</b> - password of the <b>root</b> database user;</li>
-         <li><b>AWS_S3_URL</b> - <b>url</b> of cloud backup storage;</li>
-         <li><b>AWS_S3_BUCKET</b> - name of the bucket in the backup storage;</li>
-         <li><b>AWS_S3_ACCESS_KEY_ID</b> - storage key;</li>
-         <li><b>AWS_S3_SECRET_ACCESS_KEY</b> - storage password;</li>
-         <li><b>AWS_S3_LOCAL_MOUNT_POINT</b> - path to the local folder where we mount the cloud storage;</li>
-         <li><b>MAIL_SMTP_HOST</b> - smpt host for sending mail, e.g. <b>smtp.gmail.com</b>;</li>
-         <li><b>MAIL_SMTP_PORT</b> - smpt port. Default 25;</li>
-         <li><b>MAIL_SMTP_USER</b> - smpt username;</li>
-         <li><b>MAIL_SMTP_PASSWORD</b> - smtp password.</li>
-     </ul>
-</details>
+- <b>COMPOSE_SEPARATOR</b> - separator for compose files in .env file. "<b>:</b>" for linux/MacOS, "<b>;</b>" for Windows;
+- <b>COMPOSE_FILE</b> - which docker-compose files will be included;
+- <b>SYSTEM_GROUP_ID</b> - ID of host user group. Usually 1000;
+- <b>SYSTEM_USER_ID</b> - ID of host user. Usually 1000;
+- <b>APP_NAME</b> - <b>url</b> by which the site is accessible. For example, <b>example.com</b> or <b>example.local</b> for local development;
+- <b>ADMINISTRATOR_EMAIL</b> - email to which we send information about certificates;
+- <b>DB_HOST</b> - database host. By default <b>db</b>, but in the case when the database is on another server - specify the server address;
+- <b>DB_DATABASE</b> - database name;
+- <b>DB_USER</b> - the name of the user who works with the database;
+- <b>DB_USER_PASSWORD</b> - database user password;
+- <b>DB_ROOT_PASSWORD</b> - password of the <b>root</b> database user;
+- <b>AWS_S3_URL</b> - <b>url</b> of cloud backup storage;
+- <b>AWS_S3_BUCKET</b> - name of the bucket in the backup storage;
+- <b>AWS_S3_ACCESS_KEY_ID</b> - storage key;
+- <b>AWS_S3_SECRET_ACCESS_KEY</b> - storage password;
+- <b>AWS_S3_LOCAL_MOUNT_POINT</b> - path to the local folder where we mount the cloud storage;
+- <b>MAIL_SMTP_HOST</b> - smpt host for sending mail, e.g. <b>smtp.gmail.com</b>;
+- <b>MAIL_SMTP_PORT</b> - smpt port. Default 25;
+- <b>MAIL_SMTP_USER</b> - smpt username;
+- <b>MAIL_SMTP_PASSWORD</b> - smtp password.
 
 Separately, it is worth mentioning **COMPOSE_FILE**. Depending on the environment
 we are launching a website - we need different services. For example, locally - you
 only need a base app and a cloud for backups:
 
-> compose-app.yml:compose-cloud.yml
+> dc-app.yml:dc-cloud.yml
 
 For **dev** server - backups and https:
 
-> compose-app.yml:compose-https.yml:compose-cloud.yml
+> dc-app.yml:dc-https.yml:dc-cloud.yml
 
 For **production** server - whole set:
-> compose-app.yml:compose-https.yml:compose-cloud.yml:compose-production.yml
+> dc-app.yml:dc-https.yml:dc-cloud.yml:dc-production.yml
 
 Also you may need to open database ports on dev server (for example, for PhpStorm database inspect).
 Ports setting up in compose-dev.yml, so in this case you need:
-> compose-app.yml:compose-dev.yml
+> dc-app.yml:dc-dev.yml
 
 ### 4. Create folder for website content
 
