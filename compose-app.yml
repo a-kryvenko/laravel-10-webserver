@@ -2,7 +2,7 @@ version: '3'
 services:
   db:
     image: mysql
-    container_name: database
+    container_name: estore-database
     restart: unless-stopped
     tty: true
     environment:
@@ -11,7 +11,7 @@ services:
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_USER_PASSWORD}
     volumes:
-      - ./.backups:/var/www/.backups
+      - ./.backups:/var/estore/.backups
       - ./.docker/mysql/my.cnf:/etc/mysql/my.cnf
       - database:/var/lib/mysql
     networks:
@@ -19,23 +19,19 @@ services:
 
   app:
     image: php:8.1-fpm
-    container_name: application
+    container_name: estore-application
     build:
       context: .
       dockerfile: Dockerfile
       args:
         GID: ${SYSTEM_GROUP_ID}
         UID: ${SYSTEM_USER_ID}
-        SMTP_HOST: ${MAIL_SMTP_HOST}
-        SMTP_PORT: ${MAIL_SMTP_PORT}
-        SMTP_EMAIL: ${MAIL_SMTP_USER}
-        SMTP_PASSWORD: ${MAIL_SMTP_PASSWORD}
     restart: unless-stopped
     tty: true
-    working_dir: /var/www/app
+    working_dir: /var/estore/www
     volumes:
-      - ./app:/var/www/app
-      - ./log:/var/www/log
+      - ./www:/var/estore/www
+      - ./log:/var/estore/log
       - ./.docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
       - backend
@@ -46,26 +42,26 @@ services:
     build:
       context: .
     image: composer
-    container_name: composer
-    working_dir: /var/www/app
+    container_name: estore-composer
+    working_dir: /var/estore/www
     command: "composer install"
     restart: "no"
     depends_on:
       - app
     volumes:
-      - ./app:/var/www/app
+      - ./www:/var/estore/www
 
   webserver:
     image: nginx:stable-alpine
-    container_name: webserver
+    container_name: estore-webserver
     restart: unless-stopped
     tty: true
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./app/public:/var/www/app/public
-      - ./log:/var/www/log
+      - ./www:/var/estore/www
+      - ./log:/var/estore/log
       - ./.docker/nginx/default.conf:/etc/nginx/includes/default.conf
       - ./.docker/nginx/templates/http.conf.template:/etc/nginx/templates/website.conf.template
     environment:

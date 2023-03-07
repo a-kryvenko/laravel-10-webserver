@@ -2,30 +2,27 @@ FROM php:8.1-fpm
 
 ARG GID
 ARG UID
-ARG SMTP_HOST
-ARG SMTP_PORT
-ARG SMTP_EMAIL
-ARG SMTP_PASSWORD
 
 USER root
 
-WORKDIR /var/www
+WORKDIR /var/estore
 
 RUN apt-get update -y \
     && apt-get autoremove -y \
     && apt-get install -y --no-install-recommends \
-    msmtp \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    libpng-dev \
+    libonig-dev \
+    libbz2-dev \
+    libssl-dev \
     zip \
     unzip \
-    && docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable mysqli pdo pdo_mysql \
+    curl \
+    && docker-php-ext-configure gd --with-jpeg --with-freetype \
+    && docker-php-ext-install gd mbstring mysqli pdo pdo_mysql \
     && rm -rf /var/lib/apt/lists/*
-
-COPY ./.docker/msmtp/msmtprc /etc/msmtprc
-
-RUN sed -i "s/#HOST#/$SMTP_HOST/" /etc/msmtprc \
-        && sed -i "s/#PORT#/$SMTP_PORT/" /etc/msmtprc \
-        && sed -i "s/#EMAIL#/$SMTP_EMAIL/" /etc/msmtprc \
-        && sed -i "s/#PASSWORD#/$SMTP_PASSWORD/" /etc/msmtprc
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
