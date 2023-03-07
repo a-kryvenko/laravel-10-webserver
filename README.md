@@ -24,7 +24,7 @@ Webserver included:
 ### 1. Clone repository
 
 ~~~
-git clone git@github.com:a-kryvenko/docker-website.git .
+git clone git@github.com:a-kryvenko/laravel-10-webserver.git .
 ~~~
 
 ### 2. Create copy of .env file:
