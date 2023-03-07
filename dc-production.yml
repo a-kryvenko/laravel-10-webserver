@@ -6,8 +6,11 @@ services:
   app:
     restart: always
 
-  webserver:
+  nginx:
     restart: always
+
+  composer:
+    command: "composer install --no-dev"
 
   cloudStorage:
     restart: always

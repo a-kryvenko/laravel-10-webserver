@@ -5,7 +5,7 @@ ARG UID
 
 USER root
 
-WORKDIR /var/estore
+WORKDIR /var/webserver
 
 RUN apt-get update -y \
     && apt-get autoremove -y \

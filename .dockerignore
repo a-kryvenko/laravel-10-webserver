@@ -6,7 +6,7 @@
 .backups
 .certbot
 .env
-app
+www
 cgi-bin
 log
 .docker/certbot/*

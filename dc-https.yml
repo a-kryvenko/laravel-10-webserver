@@ -1,6 +1,6 @@
 version: '3'
 services:
-  webserver:
+  nginx:
     volumes:
       - ./.docker/certbot/conf:/etc/letsencrypt
       - ./.docker/certbot/www:/var/www/.docker/certbot/www
@@ -11,6 +11,6 @@ services:
     container_name: certbot
     restart: "no"
     volumes:
-      - ./log/letsencrypt:/var/www/log/letsencrypt
+      - ./log/letsencrypt:/var/webserver/log/letsencrypt
       - ./.docker/certbot/conf:/etc/letsencrypt
-      - ./.docker/certbot/www:/var/www/.docker/certbot/www
+      - ./.docker/certbot/www:/var/webserver/www/.docker/certbot/www

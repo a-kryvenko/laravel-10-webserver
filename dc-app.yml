@@ -2,7 +2,7 @@ version: '3'
 services:
   db:
     image: mysql
-    container_name: estore-database
+    container_name: webserver-database
     restart: unless-stopped
     tty: true
     environment:
@@ -11,7 +11,7 @@ services:
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_USER_PASSWORD}
     volumes:
-      - ./.backups:/var/estore/.backups
+      - ./.backups:/var/webserver/.backups
       - ./.docker/mysql/my.cnf:/etc/mysql/my.cnf
       - database:/var/lib/mysql
     networks:
@@ -19,7 +19,7 @@ services:
 
   app:
     image: php:8.1-fpm
-    container_name: estore-application
+    container_name: webserver-application
     build:
       context: .
       dockerfile: Dockerfile
@@ -28,40 +28,40 @@ services:
         UID: ${SYSTEM_USER_ID}
     restart: unless-stopped
     tty: true
-    working_dir: /var/estore/www
+    working_dir: /var/webserver/www
     volumes:
-      - ./www:/var/estore/www
-      - ./log:/var/estore/log
+      - ./www:/var/webserver/www
+      - ./log:/var/webserver/log
       - ./.docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
       - backend
     links:
-      - "webserver:${APP_NAME}"
+      - "nginx:${APP_NAME}"
 
   composer:
     build:
       context: .
     image: composer
-    container_name: estore-composer
-    working_dir: /var/estore/www
+    container_name: webserver-composer
+    working_dir: /var/webserver/www
     command: "composer install"
     restart: "no"
     depends_on:
       - app
     volumes:
-      - ./www:/var/estore/www
+      - ./www:/var/webserver/www
 
-  webserver:
+  nginx:
     image: nginx:stable-alpine
-    container_name: estore-webserver
+    container_name: webserver-webserver
     restart: unless-stopped
     tty: true
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./www:/var/estore/www
-      - ./log:/var/estore/log
+      - ./www:/var/webserver/www
+      - ./log:/var/webserver/log
       - ./.docker/nginx/default.conf:/etc/nginx/includes/default.conf
       - ./.docker/nginx/templates/http.conf.template:/etc/nginx/templates/website.conf.template
     environment:
