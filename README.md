@@ -1,15 +1,14 @@
-# Webserver on docker containers
+# Webserver on docker containers for Laravel 10.0
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
-Development process described in **[habr.com](https://habr.com/ru/post/670938/)**.
+Based on **[docker-webserver](https://github.com/a-kryvenko/docker-webserver)**.
 
 Webserver included:
 - MySQL
 - PHP
 - Nginx
-- msmtp
 - composer
 - letsencrypt SSL certificates
 - cloud backups
@@ -95,4 +94,17 @@ docker-compose up -d
 
 ~~~ 
 ./cgi-bin/prepare-crontab.sh
+~~~
+
+### 7. Create folder for website content
+
+~~~ 
+mkdir www
+cd www
+~~~
+
+### 8. Install you website content
+
+~~~ 
+git clone you-repository .
 ~~~
