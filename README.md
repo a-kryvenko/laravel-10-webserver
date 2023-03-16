@@ -6,18 +6,21 @@
 Based on **[docker-webserver](https://github.com/a-kryvenko/docker-webserver)**.
 
 Webserver included:
-- MySQL
-- PHP
 - Nginx
+- PHP
+- Redis
+- MySQL
 - composer
-- letsencrypt SSL certificates
 - cloud backups
+- Mailhog (for development environment)
+- NodeJS (for development environment)
 
 ## Before starting
 
-1. **[Prepare](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-22-04)** server
-2. **[Install](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-22-04)** **docker**
-3. **[Install](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04)** **docker-compose**
+1. **[Prepare](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-22-04)** server;
+2. **[Install](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-22-04)** **docker**;
+3. **[Install](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04)** **docker-compose**;
+4. Optional. For production server configure **[acme-companion](https://github.com/nginx-proxy/acme-companion)** - nginx-proxy an certificates.
 
 ## Installation:
 
@@ -50,46 +53,26 @@ cp .env.example .env
 - <b>AWS_S3_BUCKET</b> - name of the bucket in the backup storage;
 - <b>AWS_S3_ACCESS_KEY_ID</b> - storage key;
 - <b>AWS_S3_SECRET_ACCESS_KEY</b> - storage password;
-- <b>AWS_S3_LOCAL_MOUNT_POINT</b> - path to the local folder where we mount the cloud storage;
-- <b>MAIL_SMTP_HOST</b> - smpt host for sending mail, e.g. <b>smtp.gmail.com</b>;
-- <b>MAIL_SMTP_PORT</b> - smpt port. Default 25;
-- <b>MAIL_SMTP_USER</b> - smpt username;
-- <b>MAIL_SMTP_PASSWORD</b> - smtp password.
+- <b>AWS_S3_LOCAL_MOUNT_POINT</b> - path to the local folder where we mount the cloud storage.
 
-Separately, it is worth mentioning **COMPOSE_FILE**. Depending on the environment
-we are launching a website - we need different services. For example, locally - you
-only need a base app and a cloud for backups:
+### 4. Compose files description
 
-> dc-app.yml:dc-cloud.yml
+- <b>dc-app.yml</b> - core webserver services. Include nginx, php, redis;
+- <b>dc-db.yml</b> - database service. Use if you database is on same server;
+- <b>dc-dev.yml</b> - dev environment services. NPM, NodeJs, MailHog;
+- <b>dc-cloud.yml</b> - cloud backups storage.
 
-For **dev** server - backups and https:
-
-> dc-app.yml:dc-https.yml:dc-cloud.yml
-
-For **production** server - whole set:
-> dc-app.yml:dc-https.yml:dc-cloud.yml:dc-production.yml
-
-Also you may need to open database ports on dev server (for example, for PhpStorm database inspect).
-Ports setting up in compose-dev.yml, so in this case you need:
-> dc-app.yml:dc-dev.yml
-
-### 4. Create folder for website content
+### 5. Create folder for website content
 
 ~~~ 
 mkdir www
 ~~~
 
-### 5. Build images and up server
+### 6. Build images and up server
 
 ~~~
 docker-compose build \  
 docker-compose up -d
-~~~
-
-### 6. If https required, then run script for creating certificates
-
-~~~
-./cgi-bin/prepare-certbot.sh
 ~~~
 
 ### 7. Initialize crontab
@@ -100,7 +83,35 @@ docker-compose up -d
 
 ### 8. Install you website content
 
+If you clone existing repository - then use follow:
+
 ~~~ 
 cd www
 git clone you-repository .
+~~~
+
+In case, if you create new repository - use composer:
+
+~~~
+docker-compose run --rm composer create-project laravel/laravel www
+~~~
+
+### 9. Using artisan, composer and npm
+
+Webserver present standalone containers for composer, artisan and npm commands.
+To run commands - use next examples:
+
+~~~
+docker-compose run --rm composer [you composer command]
+docker-compose run --rm composer require spatie/laravel-permission
+~~~
+
+~~~
+docker-compose run --rm artisan [you artisan command]
+docker-compose run --rm artisan migrate
+~~~
+
+~~~
+docker-compose run --rm npm [you npm command]
+docker-compose run --rm npm build
 ~~~
