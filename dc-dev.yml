@@ -1,5 +1,55 @@
 version: '3'
 services:
+  # Open database ports for PhpStorm inspect
   db:
     ports:
       - "3306:3306"
+
+  # Open nginx ports
+  nginx:
+    depends_on:
+      - node
+    ports:
+      - "80:80"
+
+  # NodeJs container to background frontend compilation
+  node:
+    image: node:19-alpine
+    container_name: estore-node
+    restart: "no"
+    tty: true
+    working_dir: /var/webserver/www
+    command: "npm run host"
+    volumes:
+      - ./www:/var/webserver/www
+    networks:
+      - frontend
+    ports:
+      - "5173:5173"
+
+  # NodeJs container to build frontend
+  npm:
+    image: node:alpine
+    container_name: estore-npm
+    volumes:
+      - ./www:/var/webserver/www
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    working_dir: /var/webserver/www
+    profiles: [ "npm" ]
+    entrypoint: [ 'npm' ]
+    networks:
+      - backend
+
+  # Email client to inspect mailing features
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: estore-mailhog
+    logging:
+      driver: 'none'
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - backend

@@ -1,73 +1,126 @@
 version: '3'
 services:
-  db:
-    image: mysql
-    container_name: webserver-database
-    restart: unless-stopped
-    tty: true
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_USER_PASSWORD}
-    volumes:
-      - ./.backups:/var/webserver/.backups
-      - ./.docker/mysql/my.cnf:/etc/mysql/my.cnf
-      - database:/var/lib/mysql
-    networks:
-      - backend
-
-  app:
-    image: php:8.1-fpm
-    container_name: webserver-application
+  nginx:
+    container_name: estore-nginx
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ./.docker
+      dockerfile: nginx.Dockerfile
       args:
-        GID: ${SYSTEM_GROUP_ID}
-        UID: ${SYSTEM_USER_ID}
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+        - USER=${USER:-laravel}
     restart: unless-stopped
-    tty: true
-    working_dir: /var/webserver/www
+    volumes:
+      - ./www:/var/webserver/www
+      - ./log:/var/webserver/log
+    depends_on:
+      - php
+      - redis
+    networks:
+      frontend:
+      backend:
+        aliases:
+          - ${APP_NAME}
+
+  php:
+    container_name: estore-php
+    build:
+      context: ./.docker
+      dockerfile: php.Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+        - USER=${USER:-laravel}
+    restart: unless-stopped
+    ports:
+      - ":9000"
     volumes:
       - ./www:/var/webserver/www
       - ./log:/var/webserver/log
       - ./.docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
       - backend
-    links:
-      - "nginx:${APP_NAME}"
 
-  composer:
-    build:
-      context: .
-    image: composer
-    container_name: webserver-composer
-    working_dir: /var/webserver/www
-    command: "composer install"
-    restart: "no"
-    depends_on:
-      - app
-    volumes:
-      - ./www:/var/webserver/www
-
-  nginx:
-    image: nginx:stable-alpine
-    container_name: webserver-webserver
+  redis:
+    image: redis:alpine
+    container_name: estore-redis
     restart: unless-stopped
-    tty: true
     ports:
-      - "80:80"
-      - "443:443"
+      - "6380:6379"
+    networks:
+      - backend
+
+  laravel-crontab:
+    build:
+      context: ./.docker
+      dockerfile: php.Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+        - USER=${USER:-laravel}
+    container_name: estore-laravel-crontab
     volumes:
       - ./www:/var/webserver/www
       - ./log:/var/webserver/log
-      - ./.docker/nginx/default.conf:/etc/nginx/includes/default.conf
-      - ./.docker/nginx/templates/http.conf.template:/etc/nginx/templates/website.conf.template
-    environment:
-      - APP_NAME=${APP_NAME}
+    working_dir: /var/webserver/www
+    entrypoint: [ 'php', '/var/webserver/www/artisan', 'schedule:work' ]
     networks:
-      - frontend
+      - backend
+
+  laravel-queue:
+    build:
+      context: ./.docker
+      dockerfile: php.Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+        - USER=${USER:-laravel}
+    container_name: estore-laravel-queue
+    volumes:
+      - ./www:/var/webserver/www
+      - ./log:/var/webserver/log
+    working_dir: /var/webserver/www
+    entrypoint: [ 'php', '/var/webserver/www/artisan', 'queue:work' ]
+    networks:
+      - backend
+
+  composer:
+    build:
+      context: ./.docker
+      dockerfile: composer.Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+        - USER=${USER:-laravel}
+    container_name: estore-composer
+    volumes:
+      - ./www:/var/webserver/www
+      - ./log:/var/webserver/log
+    working_dir: /var/webserver/www
+    depends_on:
+      - php
+    user: ${USER:-laravel} #system user
+    profiles: [ "composer" ]
+    entrypoint: [ 'composer', '--ignore-platform-reqs' ]
+    networks:
+      - backend
+
+  artisan:
+    build:
+      context: ./.docker
+      dockerfile: php.Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+        - USER=${USER:-laravel}
+    container_name: artisan
+    volumes:
+      - ./www:/var/webserver/www
+      - ./log:/var/webserver/log
+    working_dir: /var/webserver/www
+    profiles: [ "artisan" ]
+    entrypoint: [ 'php', '/var/webserver/www/artisan' ]
+    networks:
       - backend
 
 networks:
@@ -75,6 +128,3 @@ networks:
     driver: bridge
   backend:
     driver: bridge
-
-volumes:
-  database:
