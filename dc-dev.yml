@@ -29,6 +29,7 @@ services:
 
   # NodeJs container to build frontend
   npm:
+    profiles: ["npm"]
     image: node:alpine
     container_name: estore-npm
     volumes:
@@ -37,7 +38,6 @@ services:
       - "3000:3000"
       - "3001:3001"
     working_dir: /var/webserver/www
-    profiles: [ "npm" ]
     entrypoint: [ 'npm' ]
     networks:
       - backend

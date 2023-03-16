@@ -85,6 +85,7 @@ services:
       - backend
 
   composer:
+    profiles: ["composer"]
     build:
       context: ./.docker
       dockerfile: composer.Dockerfile
@@ -100,12 +101,12 @@ services:
     depends_on:
       - php
     user: ${USER:-laravel} #system user
-    profiles: [ "composer" ]
     entrypoint: [ 'composer', '--ignore-platform-reqs' ]
     networks:
       - backend
 
   artisan:
+    profiles: ["artisan"]
     build:
       context: ./.docker
       dockerfile: php.Dockerfile
@@ -118,7 +119,6 @@ services:
       - ./www:/var/webserver/www
       - ./log:/var/webserver/log
     working_dir: /var/webserver/www
-    profiles: [ "artisan" ]
     entrypoint: [ 'php', '/var/webserver/www/artisan' ]
     networks:
       - backend
