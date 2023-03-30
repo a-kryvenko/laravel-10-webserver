@@ -22,7 +22,7 @@ services:
 
   db:
     image: mysql
-    container_name: estore-database
+    container_name: lws-database
     restart: unless-stopped
     tty: true
     environment:

@@ -15,7 +15,7 @@ services:
   # NodeJs container to background frontend compilation
   node:
     image: node:19-alpine
-    container_name: estore-node
+    container_name: lws-node
     restart: "no"
     tty: true
     working_dir: /var/webserver/www
@@ -31,7 +31,7 @@ services:
   npm:
     profiles: ["npm"]
     image: node:alpine
-    container_name: estore-npm
+    container_name: lws-npm
     volumes:
       - ./www:/var/webserver/www
     ports:
@@ -45,7 +45,7 @@ services:
   # Email client to inspect mailing features
   mailhog:
     image: mailhog/mailhog:latest
-    container_name: estore-mailhog
+    container_name: lws-mailhog
     logging:
       driver: 'none'
     ports:

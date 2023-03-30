@@ -1,7 +1,7 @@
 version: '3'
 services:
   nginx:
-    container_name: estore-nginx
+    container_name: lws-nginx
     build:
       context: ./.docker
       dockerfile: nginx.Dockerfile
@@ -23,7 +23,7 @@ services:
           - ${APP_NAME}
 
   php:
-    container_name: estore-php
+    container_name: lws-php
     build:
       context: ./.docker
       dockerfile: php.Dockerfile
@@ -43,7 +43,7 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: estore-redis
+    container_name: lws-redis
     restart: unless-stopped
     ports:
       - "6380:6379"
@@ -58,7 +58,7 @@ services:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
         - USER=${USER:-laravel}
-    container_name: estore-laravel-crontab
+    container_name: lws-laravel-crontab
     volumes:
       - ./www:/var/webserver/www
       - ./log:/var/webserver/log
@@ -75,7 +75,7 @@ services:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
         - USER=${USER:-laravel}
-    container_name: estore-laravel-queue
+    container_name: lws-laravel-queue
     volumes:
       - ./www:/var/webserver/www
       - ./log:/var/webserver/log
@@ -93,7 +93,7 @@ services:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
         - USER=${USER:-laravel}
-    container_name: estore-composer
+    container_name: lws-composer
     volumes:
       - ./www:/var/webserver/www
       - ./log:/var/webserver/log
