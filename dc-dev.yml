@@ -1,21 +1,42 @@
 version: '3'
 services:
+  nginx:
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - assets-compiler
+
+  php:
+    restart: unless-stopped
+
+  mail:
+    restart: unless-stopped
+    environment:
+      SMARTHOST_ADDRESS: ${MAIL_SMTP_HOST}
+      SMARTHOST_PORT: ${MAIL_SMTP_PORT}
+      SMARTHOST_USER: ${MAIL_SMTP_USER}
+      SMARTHOST_PASSWORD: ${MAIL_SMTP_PASSWORD}
+
+  redis:
+    restart: unless-stopped
+
+  laravel-schedule:
+    restart: unless-stopped
+
+  laravel-queue:
+    restart: unless-stopped
+
   # Open database ports for PhpStorm inspect
   db:
+    restart: unless-stopped
     ports:
       - "3306:3306"
 
-  # Open nginx ports
-  nginx:
-    depends_on:
-      - node
-    ports:
-      - "80:80"
-
   # NodeJs container to background frontend compilation
-  node:
+  assets-compiler:
     image: node:19-alpine
-    container_name: lws-node
+    container_name: lws-assets-compiler
     restart: "no"
     tty: true
     working_dir: /var/webserver/www
@@ -40,12 +61,13 @@ services:
     working_dir: /var/webserver/www
     entrypoint: [ 'npm' ]
     networks:
-      - backend
+      - frontend
 
   # Email client to inspect mailing features
   mailhog:
     image: mailhog/mailhog:latest
     container_name: lws-mailhog
+    restart: unless-stopped
     logging:
       driver: 'none'
     ports:

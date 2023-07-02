@@ -47,6 +47,16 @@ RUN mkdir -p /usr/src/php/ext/redis \
     && echo 'redis' >> /usr/src/php-available-exts \
     && docker-php-ext-install redis
 
+# Configure connection to mail sender container
+COPY --chown=www:www .msmtprc /etc/msmtprc.default
+COPY --chown=www:www .msmtprc /etc/msmtprc
+
 USER www
 
-CMD ["php-fpm", "-y", "/usr/local/etc/php-fpm.conf", "-R"]
+# When runned - set msmtp configuration and up php-fpm
+CMD cp /etc/msmtprc.default /tmp/msmtprc \
+    && sed -i "s/#EMAIL#/$SMTP_EMAIL/" /tmp/msmtprc \
+    && sed -i "s/#CONTAINER#/$SMTP_CONTAINER/" /tmp/msmtprc \
+    && cat /tmp/msmtprc >/etc/msmtprc \
+    && rm /tmp/msmtprc \
+    && php-fpm -y /usr/local/etc/php-fpm.conf -R

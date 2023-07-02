@@ -9,7 +9,7 @@ services:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
         - USER=${USER:-laravel}
-    restart: unless-stopped
+    restart: always
     volumes:
       - ./www:/var/webserver/www
       - ./log:/var/webserver/log
@@ -31,7 +31,7 @@ services:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
         - USER=${USER:-laravel}
-    restart: unless-stopped
+    restart: always
     expose:
       - "9000"
     volumes:
@@ -41,16 +41,29 @@ services:
     networks:
       - backend
 
-  redis:
-    image: redis:alpine
-    container_name: lws-redis
-    restart: unless-stopped
-    ports:
-      - "6380:6379"
+  mail:
+    image: namshi/smtp
+    container_name: lws-mailer
+    restart: always
+    tty: true
+    environment:
+      SMARTHOST_ADDRESS: ${MAIL_SMTP_HOST}
+      SMARTHOST_PORT: ${MAIL_SMTP_PORT}
+      SMARTHOST_USER: ${MAIL_SMTP_USER}
+      SMARTHOST_PASSWORD: ${MAIL_SMTP_PASSWORD}
     networks:
       - backend
 
-  laravel-crontab:
+  redis:
+    image: redis:alpine
+    container_name: lws-redis
+    restart: always
+    ports:
+      - "127.0.0.1:6380:6379"
+    networks:
+      - backend
+
+  laravel-schedule:
     build:
       context: ./.docker
       dockerfile: php.Dockerfile
@@ -58,7 +71,8 @@ services:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
         - USER=${USER:-laravel}
-    container_name: lws-laravel-crontab
+    container_name: lws-crontab
+    restart: always
     volumes:
       - ./www:/var/webserver/www
       - ./log:/var/webserver/log
@@ -75,7 +89,8 @@ services:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
         - USER=${USER:-laravel}
-    container_name: lws-laravel-queue
+    container_name: lws-queue
+    restart: always
     volumes:
       - ./www:/var/webserver/www
       - ./log:/var/webserver/log
@@ -94,6 +109,7 @@ services:
         - GID=${GID:-1000}
         - USER=${USER:-laravel}
     container_name: lws-composer
+    restart: "no"
     volumes:
       - ./www:/var/webserver/www
       - ./log:/var/webserver/log
@@ -114,7 +130,8 @@ services:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
         - USER=${USER:-laravel}
-    container_name: artisan
+    container_name: lws-artisan
+    restart: "no"
     volumes:
       - ./www:/var/webserver/www
       - ./log:/var/webserver/log
