@@ -32,8 +32,8 @@ services:
         - GID=${GID:-1000}
         - USER=${USER:-laravel}
     restart: unless-stopped
-    ports:
-      - ":9000"
+    expose:
+      - "9000"
     volumes:
       - ./www:/var/webserver/www
       - ./log:/var/webserver/log
