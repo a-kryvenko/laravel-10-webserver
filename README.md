@@ -93,7 +93,7 @@ git clone you-repository .
 In case, if you create new repository - use composer:
 
 ~~~
-docker-compose run --rm composer create-project laravel/laravel www
+docker-compose run --rm composer create-project laravel/laravel .
 ~~~
 
 ### 9. Using artisan, composer and npm
