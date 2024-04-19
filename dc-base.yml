@@ -1,0 +1,46 @@
+version: '3'
+services:
+  php:
+    container_name: lws-php
+    build:
+      context: ./.docker
+      dockerfile: php.Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+        - USER=${USER:-laravel}
+    restart: always
+    expose:
+      - "9000"
+    volumes:
+      - ./www:/var/webserver/www
+      - ./log:/var/webserver/log
+      - ./.docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - backend
+
+  composer:
+    profiles: ["composer"]
+    build:
+      context: ./.docker
+      dockerfile: composer.Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+        - USER=${USER:-laravel}
+    container_name: lws-composer
+    restart: "no"
+    volumes:
+      - ./www:/var/webserver/www
+      - ./log:/var/webserver/log
+    working_dir: /var/webserver/www
+    depends_on:
+      - php
+    user: ${USER:-laravel} #system user
+    entrypoint: [ 'composer', '--ignore-platform-reqs' ]
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

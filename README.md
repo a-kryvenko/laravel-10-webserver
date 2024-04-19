@@ -5,13 +5,16 @@
 
 Based on **[docker-webserver](https://github.com/a-kryvenko/docker-webserver)**.
 
+**Environment for laravel 10.0 moved to v10.0 branch.**
+
+Actual branch contains configuration for actual laravel version
+
 Webserver included:
 - Nginx
 - PHP
 - Redis
 - MySQL
 - composer
-- cloud backups
 - Mailhog (for development environment)
 - NodeJS (for development environment)
 
@@ -57,16 +60,23 @@ cp .env.example .env
 
 ### 4. Compose files description
 
-- <b>dc-app.yml</b> - core webserver services. Include nginx, php, redis;
+- <b>dc-base.yml</b> - core backend services. Include php and composer;
+- <b>dc-app.yml</b> - core webserver services. Include nginx, redis, laravel utilites;
 - <b>dc-db.yml</b> - database service. Use if you database is on same server;
-- <b>dc-dev.yml</b> - dev environment services. NPM, NodeJs, MailHog;
-- <b>dc-cloud.yml</b> - cloud backups storage.
+- <b>dc-dev.yml</b> - dev environment services. NPM, NodeJs, MailHog.
 
-### 5. Create folder for website content
+### 5. [Optional] Build laravel project from scratch
+
+In .env file set COMPOSE_FILE to dc-base.yml, and then run
 
 ~~~ 
-mkdir www
+docker-compose build
+docker-compose up -d
+docker-compose run --rm composer create-project laravel/laravel .
+docker-compose down
 ~~~
+
+and now set in COMPOSE_FILE all other compose files
 
 ### 6. Build images and up server
 
@@ -81,19 +91,13 @@ docker-compose up -d
 ./cgi-bin/prepare-crontab.sh
 ~~~
 
-### 8. Install you website content
+### 8. [Optional] Clone you website content
 
 If you clone existing repository - then use follow:
 
 ~~~ 
 cd www
 git clone you-repository .
-~~~
-
-In case, if you create new repository - use composer:
-
-~~~
-docker-compose run --rm composer create-project laravel/laravel .
 ~~~
 
 ### 9. Using artisan, composer and npm

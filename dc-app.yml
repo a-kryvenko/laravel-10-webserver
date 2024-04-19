@@ -22,25 +22,6 @@ services:
         aliases:
           - ${APP_NAME}
 
-  php:
-    container_name: lws-php
-    build:
-      context: ./.docker
-      dockerfile: php.Dockerfile
-      args:
-        - UID=${UID:-1000}
-        - GID=${GID:-1000}
-        - USER=${USER:-laravel}
-    restart: always
-    expose:
-      - "9000"
-    volumes:
-      - ./www:/var/webserver/www
-      - ./log:/var/webserver/log
-      - ./.docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
-    networks:
-      - backend
-
   mail:
     image: namshi/smtp
     container_name: lws-mailer
@@ -142,6 +123,4 @@ services:
 
 networks:
   frontend:
-    driver: bridge
-  backend:
     driver: bridge
